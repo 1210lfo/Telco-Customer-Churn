@@ -48,4 +48,5 @@ Este README proporciona una visión clara de la estructura y el propósito del p
 Este proyecto utiliza **Python 3.12.9**. Para instalar las dependencias necesarias, ejecuta el siguiente comando en la terminal dentro del entorno virtual:  
 
 ```bash
-pip install -r requirements.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
