@@ -1,7 +1,8 @@
-# Telco customer Chrun Data Science Project 
+# Telco customer Chrun Data Science Project
 
 ## Objetivos del proyecto
-- **Desarrollo Básico de Inicio a Final**: Implementar una prueba de concepto (POC).
+
+- **Desarrollo Básico de Inicio a Final:** Implementar una prueba de concepto (POC).
 - **Trabajo en Equipo**: Fomentar la colaboración mediante la creación y revisión de Pull Requests (PR) y la aplicación de metodologías ágiles, este proyecto protege la rama principal de forma que solo pueda agregarse información mediante un merge que haya resultado de un pull request y que esté aceptado por mínimo 2 personas.
 - **Buenas Prácticas de Desarrollo de Software**:
   - Gestión de ambientes virtuales.
@@ -26,7 +27,6 @@ El proyecto está organizado en las siguientes carpetas y archivos:
 - `.gitignore`: Archivos y carpetas que no deben ser versionadas en Git.
 - `README.md`: Descripción del proyecto, estructura y objetivos.
 - `requirements.txt`: Lista de dependencias necesarias para reproducir el entorno.
-
 
 ### Descripción de los Datos
 
