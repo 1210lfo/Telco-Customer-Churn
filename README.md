@@ -1,7 +1,8 @@
-# Telco customer Chrun Data Science Project 
+# Telco customer Chrun Data Science Project
 
 ## Objetivos del proyecto
-- **Desarrollo Básico de Inicio a Final**: Implementar una prueba de concepto (POC).
+
+- **Desarrollo Básico de Inicio a Final:** Implementar una prueba de concepto (POC).
 - **Trabajo en Equipo**: Fomentar la colaboración mediante la creación y revisión de Pull Requests (PR) y la aplicación de metodologías ágiles, este proyecto protege la rama principal de forma que solo pueda agregarse información mediante un merge que haya resultado de un pull request y que esté aceptado por mínimo 2 personas.
 - **Buenas Prácticas de Desarrollo de Software**:
   - Gestión de ambientes virtuales.
@@ -27,7 +28,6 @@ El proyecto está organizado en las siguientes carpetas y archivos:
 - `README.md`: Descripción del proyecto, estructura y objetivos.
 - `requirements.txt`: Lista de dependencias necesarias para reproducir el entorno.
 
-
 ### Descripción de los Datos
 
 El dataset utilizado proviene del conjunto de datos **Telco Customer Churn** de IBM. Contiene información de clientes con características como:
@@ -48,4 +48,5 @@ Este README proporciona una visión clara de la estructura y el propósito del p
 Este proyecto utiliza **Python 3.12.9**. Para instalar las dependencias necesarias, ejecuta el siguiente comando en la terminal dentro del entorno virtual:  
 
 ```bash
-pip install -r requirements.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
