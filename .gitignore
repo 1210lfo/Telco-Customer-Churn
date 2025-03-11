@@ -199,4 +199,7 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# Ignorar los datos .parquet y los .csv
+data/*.parquet
+data/*.csv
 # End of https://www.toptal.com/developers/gitignore/api/git,python,jupyternotebooks
