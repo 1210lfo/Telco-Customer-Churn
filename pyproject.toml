@@ -5,6 +5,7 @@ description = "Desarrollo de un proyecto de ciencia de datos end to end"
 readme = "README.md"
 requires-python = ">=3.12.9"
 dependencies = [
+    "joblib>=1.4.2",
     "jupyter>=1.1.1",
     "matplotlib>=3.10.0",
     "pandas>=2.2.3",
