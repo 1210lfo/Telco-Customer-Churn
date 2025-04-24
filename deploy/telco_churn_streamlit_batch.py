@@ -27,18 +27,18 @@ def preprocess_telco_data_batch(df: pd.DataFrame) -> pd.DataFrame:
     # Apply invalid values replacement logic from the forms app
     # This handles potential ' ' in TotalCharges and ensures numerical conversion robustness
     if "TotalCharges" in processed_df.columns:
-        processed_df["TotalCharges"] = pd.to_numeric(processed_df["TotalCharges"], errors="coerce")
+        processed_df["TotalCharges"] = pd.to_numeric(
+            processed_df["TotalCharges"], errors="coerce"
+        )
         # No need to replace " " specifically after using to_numeric with coerce
 
     # Convert 'Yes'/'No' inputs for SeniorCitizen to 1.0/0.0 (float)
     # Handle potential missing values in this column gracefully
     if "SeniorCitizen" in processed_df.columns:
-        processed_df["SeniorCitizen"] = processed_df["SeniorCitizen"].map(
-            {
-                "Yes": 1.0,
-                "No": 0.0,
-            }
-        )
+        processed_df["SeniorCitizen"] = processed_df["SeniorCitizen"].map({
+            "Yes": 1.0,
+            "No": 0.0,
+        })
         # If there are NaNs after mapping (e.g., blank cells), leave them as NaN for the imputer
         processed_df["SeniorCitizen"] = processed_df["SeniorCitizen"].astype(float)
 
@@ -47,7 +47,9 @@ def preprocess_telco_data_batch(df: pd.DataFrame) -> pd.DataFrame:
     numerical_cols_input = ["tenure", "MonthlyCharges", "TotalCharges"]
     for col in numerical_cols_input:
         if col in processed_df.columns:
-            processed_df[col] = pd.to_numeric(processed_df[col], errors="coerce").astype(float)
+            processed_df[col] = pd.to_numeric(
+                processed_df[col], errors="coerce"
+            ).astype(float)
 
     # Ensure categorical features are object/string type before the pipeline's OneHotEncoder
     # This is crucial if some columns might be read as bool or other types by pd.read_csv
@@ -70,7 +72,9 @@ def preprocess_telco_data_batch(df: pd.DataFrame) -> pd.DataFrame:
     ]
     for col in categorical_cols_to_ensure_string:
         if col in processed_df.columns:
-            processed_df[col] = processed_df[col].astype(str)  # Convert to string to be safe
+            processed_df[col] = processed_df[col].astype(
+                str
+            )  # Convert to string to be safe
 
     # Reindex the DataFrame to match the expected column order and ensure all features are present
     # Use the exact list of features the model pipeline was trained on.
@@ -136,7 +140,9 @@ def main() -> None:
     # To get from script to model: go up two levels (..) (..) and then down to models/
     project_root = Path(__file__).parent.parent.parent
     model_dir = project_root / "Telco-Customer-Churn" / "models"
-    model_name = "telco_churn_logistic_regression_model.joblib"  # Correct model filename
+    model_name = (
+        "telco_churn_logistic_regression_model.joblib"  # Correct model filename
+    )
     model_path = str(model_dir / model_name)
 
     model_pipeline = load_model(model_file_path=model_path)
@@ -168,15 +174,17 @@ def main() -> None:
                         # Preprocess the batch data
                         df_processed_batch = preprocess_telco_data_batch(
                             df_batch.copy()
-                        )  # Use .copy() to avoid modifying original df_batch in case it's needed later
+                        )
+                        # Use .copy() to avoid modifying original df_batch in case it's needed later
 
                         # Make predictions using the loaded pipeline
-                        # The pipeline handles all further preprocessing (imputation, encoding, scaling)
+                        # The pipeline handles all further preprocessing
+                        # (imputation, encoding, scaling)
                         predictions = model_pipeline.predict(df_processed_batch)
                         # Optionally get probabilities
-                        predictions_proba = model_pipeline.predict_proba(df_processed_batch)[
-                            :, 1
-                        ]  # Probability of churn (class 1)
+                        predictions_proba = model_pipeline.predict_proba(
+                            df_processed_batch
+                        )[:, 1]  # Probability of churn (class 1)
 
                         # Add predictions to the original DataFrame or processed DataFrame
                         result_df = (
@@ -184,12 +192,10 @@ def main() -> None:
                         )  # Add predictions to a copy of the original uploaded data
                         result_df["Predicted_Churn"] = predictions
                         result_df["Predicted_Churn_Probability"] = predictions_proba
-                        result_df["Churn_Status"] = result_df["Predicted_Churn"].map(
-                            {
-                                0: "No Churn",
-                                1: "Churn",
-                            }
-                        )
+                        result_df["Churn_Status"] = result_df["Predicted_Churn"].map({
+                            0: "No Churn",
+                            1: "Churn",
+                        })
 
                         # Display results
                         st.success("Predicciones completadas!")
@@ -206,8 +212,12 @@ def main() -> None:
                         )
 
                     except Exception as e:
-                        st.error(f"Ocurrió un error durante el procesamiento o la predicción: {e}")
-                        st.write("Por favor, verifique el formato y los datos en su archivo CSV.")
+                        st.error(
+                            f"Ocurrió un error durante el procesamiento o la predicción: {e}"
+                        )
+                        st.write(
+                            "Por favor, verifique el formato y los datos en su archivo CSV."
+                        )
                         # Optional: Print details about the error for debugging
                         # import traceback
                         # st.text(traceback.format_exc())
@@ -215,7 +225,7 @@ def main() -> None:
         except Exception as e:
             st.error(f"Error al leer el archivo CSV: {e}")
             st.info(
-                "Por favor, asegúrese de que el archivo es un CSV válido y está codificado en UTF-8."
+                "Por favor, asegúrese de que el archivo es un CSV válido y es codificado en UTF-8."
             )
 
     else:
@@ -225,33 +235,30 @@ def main() -> None:
         st.subheader("Formato de archivo CSV esperado:")
         st.write("Su archivo CSV debe contener las siguientes columnas:")
         st.write(
-            ", ".join(
-                [
-                    "gender",
-                    "SeniorCitizen",
-                    "Partner",
-                    "Dependents",
-                    "tenure",
-                    "PhoneService",
-                    "MultipleLines",
-                    "InternetService",
-                    "OnlineSecurity",
-                    "OnlineBackup",
-                    "DeviceProtection",
-                    "TechSupport",
-                    "StreamingTV",
-                    "StreamingMovies",
-                    "Contract",
-                    "PaperlessBilling",
-                    "PaymentMethod",
-                    "MonthlyCharges",
-                    "TotalCharges",
-                ]
-            )
+            ", ".join([
+                "gender",
+                "SeniorCitizen",
+                "Partner",
+                "Dependents",
+                "tenure",
+                "PhoneService",
+                "MultipleLines",
+                "InternetService",
+                "OnlineSecurity",
+                "OnlineBackup",
+                "DeviceProtection",
+                "TechSupport",
+                "StreamingTV",
+                "StreamingMovies",
+                "Contract",
+                "PaperlessBilling",
+                "PaymentMethod",
+                "MonthlyCharges",
+                "TotalCharges",
+            ])
         )
-        st.write(
-            "Asegúrese de que los nombres de las columnas coincidan exactamente (incluyendo mayúsculas/minúsculas)."
-        )
+        st.write("Asegúrese de que los nombres de las columnas coincidan exactamente.")
+        st.write("(incluyendo mayúsculas/minúsculas)")
         # Show a sample DataFrame structure
         # sample_data_batch = pd.DataFrame({ ... sample row data ... })
         # st.dataframe(sample_data_batch)
