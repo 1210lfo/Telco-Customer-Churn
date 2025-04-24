@@ -12,6 +12,7 @@
 #
 
 # Import libraries
+import sys
 from pathlib import Path
 
 # from sklearn.svm import SVC # Remove SVC import
@@ -30,7 +31,6 @@ try:
         prepare_data,  # Keep the corrected prepare_data
         print_classification_metrics,
         replace_invalid_values,
-        replace_out_of_range_values,  # Keep this although its usage differs slightly in the notebook pipeline
         summarize_classification,
         train_test_data_split,
         validate_model,
@@ -38,7 +38,7 @@ try:
 except ImportError:
     print("Error: Could not import pipeline_utils.")
     print("Please ensure pipeline_utils.py is in the same directory or in your Python path.")
-    exit()  # Exit the script if import fails
+    sys.exit()  # Exit the script if import fails
 
 
 # Configuration parameters
@@ -192,7 +192,7 @@ model_validated = validate_model(
 if not model_validated:
     print("Model does not meet performance requirements!")
     print(f"Required {SCORE_METRIC} >= {BASELINE_SCORE}, but got {test_metrics[SCORE_METRIC]:.4f}")
-    raise ValueError("Model validation failed")
+    raise ValueError("Model-validation-failed")
 
 # Save model
 print("\n=== Saving Logistic Regression model ===")

@@ -101,11 +101,12 @@ def prepare_data(
     """
     # Seleccionar características y objetivo
     # Incluimos la columna objetivo aquí temporalmente para manejar sus NaNs
-    cols_to_select = features + [target_column]
+    cols_to_select = [*features, target_column]
     filtered_df = df[cols_to_select].copy()
 
     # Convertir la columna objetivo a numérica (0 para 'No', 1 para 'Yes')
-    # Asegurarse de que los valores sean strings antes de mapear para evitar errores con NaNs u otros tipos
+    # Asegurarse de que los valores sean strings antes de mapear para evitar errores con NaNs
+    # u otros tipos
     filtered_df[target_column] = filtered_df[target_column].astype(str).map({"No": 0, "Yes": 1})
 
     # Eliminar filas donde la columna objetivo tiene valores faltantes después del mapeo
@@ -200,16 +201,19 @@ def validate_model(
     Args:
         metric_result (float): El valor real de la métrica alcanzado por el modelo.
         baseline_score (float): La puntuación mínima (o máxima) aceptable para la métrica.
-        metric_name (str): El nombre de la métrica que se está validando (para impresión). Por defecto es "recall".
-        higher_is_better (bool): Indica si un valor más alto para la métrica es mejor (ej. accuracy, recall)
-                                 o si un valor más bajo es mejor (ej. tasa de error). Por defecto es True.
+        metric_name (str): El nombre de la métrica que se está validando (para impresión).
+        Por defecto es "recall".
+        higher_is_better (bool): Indica si un valor más alto para la métrica es mejor
+        (ej. accuracy, recall) o si un valor más bajo es mejor (ej. tasa de error).
+        Por defecto es True.
 
     Returns:
-        bool: True si el resultado de la métrica del modelo cumple o excede la línea base (o está por debajo si higher_is_better es False),
-              False en caso contrario.
+        bool: True si el resultado de la métrica del modelo cumple o excede la línea
+        base (o está por debajo si higher_is_better es False), False en caso contrario.
 
     Notas:
-        Esta función compara el rendimiento del modelo en una métrica específica con una línea base predefinida.
+        Esta función compara el rendimiento del modelo en una métrica específica con una
+        línea base predefinida.
         También imprime un mensaje indicando si la validación pasó o falló.
     """
     # Determinar si la validación pasa en función de si una puntuación más alta es mejor
