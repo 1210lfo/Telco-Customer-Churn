@@ -69,12 +69,18 @@ def get_user_data() -> pd.DataFrame:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        user_data["gender"] = st.radio("Género:", options=["Male", "Female"], horizontal=True)
+        user_data["gender"] = st.radio(
+            "Género:", options=["Male", "Female"], horizontal=True
+        )
         user_data["SeniorCitizen"] = st.radio(
             "Ciudadano Mayor:", options=["Yes", "No"], horizontal=True
         )
-        user_data["Partner"] = st.radio("Pareja:", options=["Yes", "No"], horizontal=True)
-        user_data["Dependents"] = st.radio("Dependientes:", options=["Yes", "No"], horizontal=True)
+        user_data["Partner"] = st.radio(
+            "Pareja:", options=["Yes", "No"], horizontal=True
+        )
+        user_data["Dependents"] = st.radio(
+            "Dependientes:", options=["Yes", "No"], horizontal=True
+        )
         user_data["PhoneService"] = st.radio(
             "Servicio Telefónico:", options=["Yes", "No"], horizontal=True
         )
@@ -84,7 +90,7 @@ def get_user_data() -> pd.DataFrame:
 
     with col2:
         # Tenure as a number input, align range with data if possible
-        user_data["tenure"] = st.number_input(
+        user_data["tenure"] = st.slider(
             "Antigüedad (meses):", min_value=0, max_value=72, value=1, step=1
         )
         user_data["MultipleLines"] = st.selectbox(
@@ -126,13 +132,13 @@ def get_user_data() -> pd.DataFrame:
             ],
         )
         # Monthly Charges as number input
-        user_data["MonthlyCharges"] = st.number_input(
+        user_data["MonthlyCharges"] = st.slider(
             "Cargo Mensual:", min_value=0.0, max_value=200.0, value=50.0, step=0.1
         )
         # Total Charges - This is usually tenure * MonthlyCharges, but let's collect it
         # as a number input for simplicity, or it could be calculated.
         # Based on features used, TotalCharges was in the selected list.
-        user_data["TotalCharges"] = st.number_input(
+        user_data["TotalCharges"] = st.slider(
             "Cargo Total:", min_value=0.0, value=100.0, step=0.1, max_value=4000.0
         )
 
@@ -141,7 +147,9 @@ def get_user_data() -> pd.DataFrame:
 
     # --- Preprocessing for consistency with pipeline input ---
     # Apply minimal preprocessing needed for consistency with training data structure
-    df = replace_invalid_values_deploy(df)  # Handle potential string NaNs or invalid numbers
+    df = replace_invalid_values_deploy(
+        df
+    )  # Handle potential string NaNs or invalid numbers
 
     # Convert features collected as 'Yes'/'No' strings to 1/0 or boolean if the pipeline expects it.
     # Check the dtypes of X_features just before the preprocessor in simple_train_pipeline.py
@@ -216,7 +224,9 @@ def load_model(model_file_path: str) -> Pipeline:
 
 def main() -> None:
     # --- Streamlit App Configuration ---
-    st.set_page_config(page_title="Predicción de Abandono de Clientes Telco", layout="wide")
+    st.set_page_config(
+        page_title="Predicción de Abandono de Clientes Telco", layout="wide"
+    )
 
     # --- Model Loading ---
     # Define the expected location of the model file based on the project structure
@@ -226,7 +236,9 @@ def main() -> None:
     # To get from script to model: go up two levels (..) (..) and then down to models/
     project_root = Path(__file__).parent.parent.parent
     model_dir = project_root / "Telco-Customer-Churn" / "models"
-    model_name = "telco_churn_logistic_regression_model.joblib"  # Correct model filename
+    model_name = (
+        "telco_churn_logistic_regression_model.joblib"  # Correct model filename
+    )
     model_path = str(model_dir / model_name)
 
     model_pipeline = load_model(model_file_path=model_path)
@@ -236,7 +248,9 @@ def main() -> None:
     # Optional: Add a relevant image
     st.title("Predicción de Abandono de Clientes de Telecomunicaciones")
     st.markdown("#### Modelo de Regresión Logística")
-    st.write("Ingrese los datos del cliente para predecir si es probable que abandone el servicio.")
+    st.write(
+        "Ingrese los datos del cliente para predecir si es probable que abandone el servicio."
+    )
 
     # --- Get User Input ---
     df_user_data = get_user_data()
@@ -277,7 +291,9 @@ def main() -> None:
                     st.success("Predicción: Bajo riesgo de abandono.")
 
                 st.write("---")
-                st.write("Nota: Esta predicción se basa en el modelo entrenado y sus datos.")
+                st.write(
+                    "Nota: Esta predicción se basa en el modelo entrenado y sus datos."
+                )
 
             except Exception as e:
                 st.error(f"Ocurrió un error al realizar la predicción: {e}")
