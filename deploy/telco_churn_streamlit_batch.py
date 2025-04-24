@@ -129,13 +129,7 @@ def main() -> None:
     st.set_page_config(page_title="Predicción de Abandono en Lote", layout="wide")
 
     # --- Model Loading ---
-    # Define the expected location of the model file based on the project structure
-    # Project root: Telco-Customer-Churn
-    # Script location: Telco-Customer-Churn/src/deploy/
-    # Model location: Telco-Customer-Churn/models/
-    # To get from script to model: go up two levels (..) (..) and then down to models/
-    project_root = Path(__file__).parent.parent.parent
-    model_dir = project_root / "Telco-Customer-Churn" / "models"
+    model_dir = Path(__file__).parent.parent / "models"
     model_name = "telco_churn_logistic_regression_model.joblib"  # Correct model filename
     model_path = str(model_dir / model_name)
 
