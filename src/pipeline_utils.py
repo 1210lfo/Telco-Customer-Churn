@@ -9,8 +9,6 @@ Autor: Luis Felipe Ospina
 Fecha: 23 de abril de 2025
 """
 
-from typing import Dict, List, Tuple
-
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
@@ -48,8 +46,7 @@ def replace_out_of_range_values(X: pd.DataFrame) -> pd.DataFrame:
 
     # Crear una máscara para los valores fuera del rango definido para 'MonthlyCharges'
     mask = ~(
-        (X["MonthlyCharges"] > MIN_MONTHLY_CHARGE)
-        & (X["MonthlyCharges"] < MAX_MONTHLY_CHARGE)
+        (X["MonthlyCharges"] > MIN_MONTHLY_CHARGE) & (X["MonthlyCharges"] < MAX_MONTHLY_CHARGE)
     )
 
     # Reemplazar los valores fuera de rango con np.nan
@@ -86,8 +83,8 @@ def replace_invalid_values(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def prepare_data(
-    df: pd.DataFrame, features: List[str], target_column: str
-) -> Tuple[pd.DataFrame, pd.Series]:
+    df: pd.DataFrame, features: list[str], target_column: str
+) -> tuple[pd.DataFrame, pd.Series]:
     """
     Prepara los datos para el modelado seleccionando características y la columna objetivo,
     eliminando filas con valores faltantes en la columna objetivo y convirtiéndola a un
@@ -109,9 +106,7 @@ def prepare_data(
 
     # Convertir la columna objetivo a numérica (0 para 'No', 1 para 'Yes')
     # Asegurarse de que los valores sean strings antes de mapear para evitar errores con NaNs u otros tipos
-    filtered_df[target_column] = (
-        filtered_df[target_column].astype(str).map({"No": 0, "Yes": 1})
-    )
+    filtered_df[target_column] = filtered_df[target_column].astype(str).map({"No": 0, "Yes": 1})
 
     # Eliminar filas donde la columna objetivo tiene valores faltantes después del mapeo
     # Esto manejará cualquier valor original que no fuera 'No' o 'Yes' y se convirtió en NaN
@@ -134,7 +129,7 @@ def train_test_data_split(
     test_size: float = 0.2,
     random_state: int = 42,
     stratify: pd.Series = None,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
     Divide los datos de características y objetivo en conjuntos de entrenamiento y prueba.
 
@@ -159,7 +154,7 @@ def train_test_data_split(
     return x_train, x_test, y_train, y_test
 
 
-def summarize_classification(y_true: pd.Series, y_pred: np.ndarray) -> Dict[str, float]:
+def summarize_classification(y_true: pd.Series, y_pred: np.ndarray) -> dict[str, float]:
     """
     Calcula métricas clave de clasificación.
 

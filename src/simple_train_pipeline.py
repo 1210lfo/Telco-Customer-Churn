@@ -37,9 +37,7 @@ try:
     )
 except ImportError:
     print("Error: Could not import pipeline_utils.")
-    print(
-        "Please ensure pipeline_utils.py is in the same directory or in your Python path."
-    )
+    print("Please ensure pipeline_utils.py is in the same directory or in your Python path.")
     exit()  # Exit the script if import fails
 
 
@@ -193,9 +191,7 @@ model_validated = validate_model(
 
 if not model_validated:
     print("Model does not meet performance requirements!")
-    print(
-        f"Required {SCORE_METRIC} >= {BASELINE_SCORE}, but got {test_metrics[SCORE_METRIC]:.4f}"
-    )
+    print(f"Required {SCORE_METRIC} >= {BASELINE_SCORE}, but got {test_metrics[SCORE_METRIC]:.4f}")
     raise ValueError("Model validation failed")
 
 # Save model
