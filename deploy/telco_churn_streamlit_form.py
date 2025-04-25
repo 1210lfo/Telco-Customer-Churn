@@ -235,9 +235,14 @@ def main() -> None:
     st.set_page_config(page_title="Predicción de Abandono de Clientes Telco", layout="wide")
 
     # --- Model Loading ---
-    model_dir = Path(__file__).parent.parent / "models"
-    model_name = "telco_churn_logistic_regression_model.joblib"  # Correct model filename
+    model_dir = (
+        Path(__file__).parent.parent / "models"
+    )  # Go up one level from deploy to project root
+    model_name = "telco_churn_logistic_regression_model.joblib"
     model_path = str(model_dir / model_name)
+    # Add this below the model_path line for troubleshooting
+    st.text(f"Looking for model at: {model_path}")
+    st.text(f"File exists: {os.path.exists(model_path)}")
 
     # Call load_model with the corrected path
     model_pipeline = load_model(model_file_path=model_path)
