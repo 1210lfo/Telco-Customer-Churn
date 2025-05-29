@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import pandas as pd
@@ -103,25 +102,128 @@ def preprocess_telco_data_batch(df: pd.DataFrame) -> pd.DataFrame:
     return processed_df
 
 
-@st.cache_resource  # Cache the model loading
-def load_model(model_file_path: str) -> Pipeline:
+@st.cache_resource
+def load_model_robust(model_name: str) -> Pipeline:
     """
-    Loads a model in joblib format (.joblib extension).
+    Carga el modelo buscando en múltiples ubicaciones posibles.
 
     Args:
-        model_file_path (str): The absolute path where the trained model is stored.
+        model_name (str): El nombre del archivo del modelo (con extensión .joblib).
 
     Returns:
-        Pipeline: The trained model, a scikit-learn Pipeline object.
+        Pipeline: El modelo entrenado, un objeto Pipeline de scikit-learn.
     """
-    if not os.path.exists(model_file_path):
-        st.error(f"Error: Archivo del modelo no encontrado en: {model_file_path}")
-        st.stop()  # Stop the app if model is not found
+    possible_paths = [
+        Path(__file__).parent.parent / "models" / model_name,
+        Path(__file__).parent.parent.parent / "models" / model_name,
+        Path("models") / model_name,
+        Path("/mount/src/models") / model_name,
+    ]
 
-    with st.spinner("Cargando modelo..."):
-        model = load(model_file_path)
+    for path in possible_paths:
+        if path.exists():
+            st.success(f"Modelo encontrado en: {path}")
+            with st.spinner("Cargando modelo..."):
+                return load(str(path))
 
-    return model
+    st.error("Modelo no encontrado en ninguna ubicación esperada:")
+    for path in possible_paths:
+        st.write(f"- {path} (existe: {path.exists()})")
+    st.stop()
+
+
+def display_expected_format() -> None:
+    """Muestra el formato esperado del CSV."""
+    st.subheader("Formato de archivo CSV esperado:")
+    st.write("Su archivo CSV debe contener las siguientes columnas:")
+    expected_columns = [
+        "gender",
+        "SeniorCitizen",
+        "Partner",
+        "Dependents",
+        "tenure",
+        "PhoneService",
+        "MultipleLines",
+        "InternetService",
+        "OnlineSecurity",
+        "OnlineBackup",
+        "DeviceProtection",
+        "TechSupport",
+        "StreamingTV",
+        "StreamingMovies",
+        "Contract",
+        "PaperlessBilling",
+        "PaymentMethod",
+        "MonthlyCharges",
+        "TotalCharges",
+    ]
+    st.write(", ".join(expected_columns))
+    st.write("Asegúrese de que los nombres de las columnas coincidan exactamente.")
+    st.write("(incluyendo mayúsculas/minúsculas)")
+
+
+def process_batch_predictions(df_batch: pd.DataFrame, model_pipeline: Pipeline) -> None:
+    """Procesa las predicciones en lote y muestra los resultados."""
+    with st.spinner("Procesando datos y realizando predicciones..."):
+        try:
+            # Preprocess the batch data
+            df_processed_batch = preprocess_telco_data_batch(df_batch.copy())
+
+            # Make predictions using the loaded pipeline
+            predictions = model_pipeline.predict(df_processed_batch)
+            predictions_proba = model_pipeline.predict_proba(df_processed_batch)[:, 1]
+
+            # Add predictions to the original DataFrame
+            result_df = df_batch.copy()
+            result_df["Predicted_Churn"] = predictions
+            result_df["Predicted_Churn_Probability"] = predictions_proba
+            result_df["Churn_Status"] = result_df["Predicted_Churn"].map(
+                {
+                    0: "No Churn",
+                    1: "Churn",
+                }
+            )
+
+            # Display results
+            st.success("Predicciones completadas!")
+            st.subheader("Resultados de la Predicción:")
+            st.dataframe(result_df)
+
+            # Download option
+            csv_output = result_df.to_csv(index=False)
+            st.download_button(
+                label="Descargar Resultados CSV",
+                data=csv_output,
+                file_name="telco_churn_predictions_batch.csv",
+                mime="text/csv",
+            )
+
+        except Exception as e:
+            st.error(f"Ocurrió un error durante el procesamiento o la predicción: {e}")
+            st.write("Por favor, verifique el formato y los datos en su archivo CSV.")
+
+
+def handle_file_upload(model_pipeline: Pipeline) -> None:
+    """Maneja la carga de archivos y el procesamiento."""
+    uploaded_file = st.file_uploader("Seleccione un archivo CSV", type="csv")
+
+    if uploaded_file is not None:
+        try:
+            df_batch = pd.read_csv(uploaded_file)
+            st.write("Previsualización de los datos cargados:")
+            st.dataframe(df_batch.head())
+
+            if st.button("Realizar Predicciones en Lote"):
+                process_batch_predictions(df_batch, model_pipeline)
+
+        except Exception as e:
+            st.error(f"Error al leer el archivo CSV: {e}")
+            st.info(
+                "Por favor, asegúrese de que el archivo es un CSV válido y es codificado en UTF-8."
+            )
+    else:
+        st.info("Por favor, suba un archivo CSV para iniciar la predicción en lote.")
+        display_expected_format()
 
 
 def main() -> None:
@@ -129,11 +231,8 @@ def main() -> None:
     st.set_page_config(page_title="Predicción de Abandono en Lote", layout="wide")
 
     # --- Model Loading ---
-    model_dir = Path(__file__).parent.parent / "models"
-    model_name = "telco_churn_logistic_regression_model.joblib"  # Correct model filename
-    model_path = str(model_dir / model_name)
-
-    model_pipeline = load_model(model_file_path=model_path)
+    model_name = "telco_churn_logistic_regression_model.joblib"
+    model_pipeline = load_model_robust(model_name)
 
     # --- App Title and Header ---
     st.title("Predicción de Abandono de Clientes (Procesamiento por Lote)")
@@ -145,109 +244,8 @@ def main() -> None:
     # --- Batch Prediction Interface ---
     st.subheader("Subir archivo CSV para predicción en lote")
 
-    # File uploader allows user to upload a CSV file
-    uploaded_file = st.file_uploader("Seleccione un archivo CSV", type="csv")
-
-    if uploaded_file is not None:
-        # Load the uploaded CSV into a pandas DataFrame
-        try:
-            df_batch = pd.read_csv(uploaded_file)
-            st.write("Previsualización de los datos cargados:")
-            st.dataframe(df_batch.head())
-
-            # Add a button to trigger prediction
-            if st.button("Realizar Predicciones en Lote"):
-                with st.spinner("Procesando datos y realizando predicciones..."):
-                    try:
-                        # Preprocess the batch data
-                        df_processed_batch = preprocess_telco_data_batch(df_batch.copy())
-                        # Use .copy() to avoid modifying original df_batch in case it's needed later
-
-                        # Make predictions using the loaded pipeline
-                        # The pipeline handles all further preprocessing
-                        # (imputation, encoding, scaling)
-                        predictions = model_pipeline.predict(df_processed_batch)
-                        # Optionally get probabilities
-                        predictions_proba = model_pipeline.predict_proba(df_processed_batch)[
-                            :, 1
-                        ]  # Probability of churn (class 1)
-
-                        # Add predictions to the original DataFrame or processed DataFrame
-                        result_df = (
-                            df_batch.copy()
-                        )  # Add predictions to a copy of the original uploaded data
-                        result_df["Predicted_Churn"] = predictions
-                        result_df["Predicted_Churn_Probability"] = predictions_proba
-                        result_df["Churn_Status"] = result_df["Predicted_Churn"].map(
-                            {
-                                0: "No Churn",
-                                1: "Churn",
-                            }
-                        )
-
-                        # Display results
-                        st.success("Predicciones completadas!")
-                        st.subheader("Resultados de la Predicción:")
-                        st.dataframe(result_df)
-
-                        # Option to download results as CSV
-                        csv_output = result_df.to_csv(index=False)
-                        st.download_button(
-                            label="Descargar Resultados CSV",
-                            data=csv_output,
-                            file_name="telco_churn_predictions_batch.csv",
-                            mime="text/csv",
-                        )
-
-                    except Exception as e:
-                        st.error(f"Ocurrió un error durante el procesamiento o la predicción: {e}")
-                        st.write("Por favor, verifique el formato y los datos en su archivo CSV.")
-                        # Optional: Print details about the error for debugging
-                        # import traceback
-                        # st.text(traceback.format_exc())
-
-        except Exception as e:
-            st.error(f"Error al leer el archivo CSV: {e}")
-            st.info(
-                "Por favor, asegúrese de que el archivo es un CSV válido y es codificado en UTF-8."
-            )
-
-    else:
-        st.info("Por favor, suba un archivo CSV para iniciar la predicción en lote.")
-
-        # Optional: Show expected CSV format or sample data
-        st.subheader("Formato de archivo CSV esperado:")
-        st.write("Su archivo CSV debe contener las siguientes columnas:")
-        st.write(
-            ", ".join(
-                [
-                    "gender",
-                    "SeniorCitizen",
-                    "Partner",
-                    "Dependents",
-                    "tenure",
-                    "PhoneService",
-                    "MultipleLines",
-                    "InternetService",
-                    "OnlineSecurity",
-                    "OnlineBackup",
-                    "DeviceProtection",
-                    "TechSupport",
-                    "StreamingTV",
-                    "StreamingMovies",
-                    "Contract",
-                    "PaperlessBilling",
-                    "PaymentMethod",
-                    "MonthlyCharges",
-                    "TotalCharges",
-                ]
-            )
-        )
-        st.write("Asegúrese de que los nombres de las columnas coincidan exactamente.")
-        st.write("(incluyendo mayúsculas/minúsculas)")
-        # Show a sample DataFrame structure
-        # sample_data_batch = pd.DataFrame({ ... sample row data ... })
-        # st.dataframe(sample_data_batch)
+    # Handle file upload and processing
+    handle_file_upload(model_pipeline)
 
 
 if __name__ == "__main__":
