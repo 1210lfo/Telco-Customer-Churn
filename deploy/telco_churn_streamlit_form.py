@@ -234,14 +234,27 @@ def main() -> None:
     # --- Streamlit App Configuration ---
     st.set_page_config(page_title="Predicción de Abandono de Clientes Telco", layout="wide")
 
-    # --- Model Loading ---
+    # --- Model Loading (CORREGIDO) ---
+    # Usar la misma lógica que tienes arriba con Path
+    project_root = Path(__file__).parent.parent  # Subir solo un nivel desde deploy/
+    model_dir = project_root / "models"
     model_name = "telco_churn_logistic_regression_model.joblib"
+    model_path = str(model_dir / model_name)
 
-    # get the project file name: "<your_project_path>/titanic_streamlit"
-    this_file_path = os.path.abspath(__file__)
-    project_path = "/".join(this_file_path.split("/")[:-3])
+    # Debug: Mostrar las rutas para diagnosticar
+    st.write(f"Debug - Archivo actual: {__file__}")
+    st.write(f"Debug - Proyecto root: {project_root}")
+    st.write(f"Debug - Ruta del modelo: {model_path}")
+    st.write(f"Debug - ¿Existe el modelo?: {os.path.exists(model_path)}")
+
+    # Listar archivos en el directorio models para debug
+    if os.path.exists(str(model_dir)):
+        st.write(f"Debug - Archivos en models/: {os.listdir(str(model_dir))}")
+    else:
+        st.write("Debug - El directorio models/ no existe")
+
     # Call load_model with the corrected path
-    model_pipeline = load_model(model_file_path=project_path + "/models/" + model_name)
+    model_pipeline = load_model(model_file_path=model_path)
 
     # --- App Title and Header ---
     # st.image("path/to/your/telco/image.jpg", use_column_width=True)
