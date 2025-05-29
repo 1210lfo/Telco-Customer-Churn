@@ -3,13 +3,15 @@ name = "telco-customer-churn"
 version = "0.1.0"
 description = "Desarrollo de un proyecto de ciencia de datos end to end"
 readme = "README.md"
-requires-python = ">=3.12.9"
+requires-python = ">=3.11"
 dependencies = [
     "joblib>=1.4.2",
     "jupyter>=1.1.1",
     "matplotlib>=3.10.0",
     "pandas>=2.2.3",
+    "pre-commit>=4.2.0",
     "pyarrow>=19.0.1",
     "scikit-learn>=1.6.1",
     "seaborn>=0.13.2",
+    "streamlit==1.42.0",
 ]
